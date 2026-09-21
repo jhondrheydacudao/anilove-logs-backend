@@ -1,3 +1,4 @@
+
 import "dotenv/config";
 import { existsSync, readFileSync } from "node:fs";
 import path from "node:path";
@@ -6,6 +7,14 @@ function required(name: string) {
   const value = process.env[name]?.trim();
   if (!value) throw new Error(`${name} is required.`);
   return value;
+}
+
+function requiredAny(...names: string[]) {
+  for (const name of names) {
+    const value = process.env[name]?.trim();
+    if (value) return value;
+  }
+  throw new Error(`${names.join(" or ")} is required.`);
 }
 
 export const config = {
@@ -21,7 +30,7 @@ export const config = {
   smtpHost: process.env.SMTP_HOST ?? "smtp-relay.brevo.com",
   smtpPort: Number(process.env.SMTP_PORT ?? 587),
   smtpUser: required("SMTP_USER"),
-  smtpPass: required("SMTP_PASS"),
+  smtpPass: requiredAny("SMTP_PASS", "SMTP_PASSWORD"),
   emailFromName: process.env.EMAIL_FROM_NAME ?? "Anilove",
   emailFromAddress: required("EMAIL_FROM_ADDRESS"),
   appPublicUrl: required("APP_PUBLIC_URL").replace(/\/$/, ""),
