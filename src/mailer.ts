@@ -43,6 +43,9 @@ const transporter = nodemailer.createTransport({
   port: config.smtpPort,
   secure: config.smtpPort === 465,
   requireTLS: config.smtpPort === 587,
+  connectionTimeout: 15000,
+  greetingTimeout: 15000,
+  socketTimeout: 20000,
   auth: {
     user: config.smtpUser,
     pass: config.smtpPass,
@@ -50,12 +53,17 @@ const transporter = nodemailer.createTransport({
 });
 
 async function sendEmail(to: string, subject: string, htmlContent: string) {
-  await transporter.sendMail({
-    from: `"${config.emailFromName}" <${config.emailFromAddress}>`,
-    to,
-    subject,
-    html: htmlContent,
-  });
+  try {
+    await transporter.sendMail({
+      from: `"${config.emailFromName}" <${config.emailFromAddress}>`,
+      to,
+      subject,
+      html: htmlContent,
+    });
+  } catch (error) {
+    const detail = error instanceof Error ? error.message : String(error);
+    throw new Error(`SMTP delivery failed: ${detail}`);
+  }
 }
 
 export function sendVerificationEmail(email: string, token: string) {
