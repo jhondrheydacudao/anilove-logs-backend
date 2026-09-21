@@ -25,5 +25,17 @@ Railway service variables, apply `migrations/001_auth.sql` to CockroachDB, and
 generate a public HTTPS domain. Use that domain as the app's dedicated auth
 backend URL.
 
-Never expose `DATABASE_URL`, `JWT_SECRET`, or `BREVO_API_KEY` as `EXPO_PUBLIC_*`
-variables.
+Never expose `DATABASE_URL`, `DATABASE_SSL_CA`, `JWT_SECRET`, or
+`SMTP_PASSWORD` as `EXPO_PUBLIC_*` variables.
+
+To send a one-off branded verification email during deployment testing, set
+`TEST_EMAIL` temporarily and run `npm run test:email`. Run it from Railway's
+service shell or locally with the backend environment loaded, then remove the
+temporary variable. This is intentionally a CLI test rather than a public HTTP
+endpoint.
+
+For Railway, set `DATABASE_URL` to the CockroachDB connection string with
+`sslmode=require` and add the complete CockroachDB CA PEM as
+`DATABASE_SSL_CA`. Use literal `\n` line breaks in Railway's variable value.
+Do not use a Windows `sslrootcert=C:/...` path because that file does not exist
+inside Railway.
